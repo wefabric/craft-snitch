@@ -92,16 +92,14 @@ class Snitch extends Plugin
 
         if ($request->getIsCpRequest()
             && !$request->getIsAjax()
-            && !Craft::$app->getUser()->identity
-
         ) {
             // delay this check until plugins loaded...
             Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, function () {
                 $user = Craft::$app->getUser();
                 // TwoFactorAuth - either not there, or not turned on for this user, or we have passed that hurdle
                 if (!Craft::$app->plugins->isPluginInstalled('two-factor-authentication')
-                    || !\born05\twofactorauthentication\Plugin::$plugin->verify->isEnabled($user->getIdentity())
-                    || \born05\twofactorauthentication\Plugin::$plugin->verify->isVerified($user->getIdentity())
+                    || !\born05\twofactorauthentication\Plugin::$plugin->verify->isEnabled($user->getIdentity()??false)
+                    || \born05\twofactorauthentication\Plugin::$plugin->verify->isVerified($user->getIdentity()??false)
                 )
                 {
                     // Register our asset bundle

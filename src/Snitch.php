@@ -92,27 +92,27 @@ class Snitch extends Plugin
 
         if ($request->getIsCpRequest()
             && !$request->getIsAjax()
+            && !Craft::$app->getUser()->identity
+
         ) {
             // delay this check until plugins loaded...
             Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, function () {
-                if(!Craft::$app->getUser()->getIsGuest()) {
-                    $user = Craft::$app->getUser();
-                    // TwoFactorAuth - either not there, or not turned on for this user, or we have passed that hurdle
-                    if (!Craft::$app->plugins->isPluginInstalled('two-factor-authentication')
-                        || !\born05\twofactorauthentication\Plugin::$plugin->verify->isEnabled($user->getIdentity())
-                        || \born05\twofactorauthentication\Plugin::$plugin->verify->isVerified($user->getIdentity())
-                    )
-                    {
-                        // Register our asset bundle
-                        Craft::$app->getView()->registerAssetBundle(SnitchAsset::class);
-                        // on save, remove any collision for this element.
-                        // I used to do this, but it ties me to
-                        // specific classes. Instead, just rely on the record timing out.
-                        // Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, function(ElementEvent $event) {
-                        //     $elementId = $event->element->id;
-                        //     $this->collision->remove($elementId, 'element');
-                        // });
-                    }
+                $user = Craft::$app->getUser();
+                // TwoFactorAuth - either not there, or not turned on for this user, or we have passed that hurdle
+                if (!Craft::$app->plugins->isPluginInstalled('two-factor-authentication')
+                    || !\born05\twofactorauthentication\Plugin::$plugin->verify->isEnabled($user->getIdentity())
+                    || \born05\twofactorauthentication\Plugin::$plugin->verify->isVerified($user->getIdentity())
+                )
+                {
+                    // Register our asset bundle
+                    Craft::$app->getView()->registerAssetBundle(SnitchAsset::class);
+                    // on save, remove any collision for this element.
+                    // I used to do this, but it ties me to
+                    // specific classes. Instead, just rely on the record timing out.
+                    // Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, function(ElementEvent $event) {
+                    //     $elementId = $event->element->id;
+                    //     $this->collision->remove($elementId, 'element');
+                    // });
                 }
             });
         }
